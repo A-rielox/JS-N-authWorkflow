@@ -1,7 +1,12 @@
 const User = require('../models/User');
 const { StatusCodes } = require('http-status-codes');
 const CustomError = require('../errors');
-const { attachCookiesToResponse, createTokenUser } = require('../utils');
+const {
+   attachCookiesToResponse,
+   createTokenUser,
+   sendVerificationEmail,
+} = require('../utils');
+const crypto = require('crypto');
 
 const register = async (req, res) => {
    const { email, name, password } = req.body;
@@ -15,7 +20,7 @@ const register = async (req, res) => {
    const isFirstAccount = (await User.countDocuments({})) === 0;
    const role = isFirstAccount ? 'admin' : 'user';
 
-   const verificationToken = 'fake token';
+   const verificationToken = crypto.randomBytes(40).toString('hex');
 
    const user = await User.create({
       name,
@@ -25,11 +30,40 @@ const register = async (req, res) => {
       verificationToken,
    });
 
-   // send verification token back only while testing in postman!!!
+   const origin = 'http://localhost:3000';
+
+   await sendVerificationEmail({
+      name: user.name,
+      email: user.email,
+      verificationToken: user.verificationToken,
+      origin,
+   });
+
+   // send verification token back only while testing in postman!!!, despues voy a mandar el email
    res.status(StatusCodes.CREATED).json({
       msg: 'Success!, please check your email to verify your account',
-      verificationToken: user.verificationToken,
    });
+};
+
+const verifyEmail = async (req, res) => {
+   const { verificationToken, email } = req.body;
+
+   const user = await User.findOne({ email });
+   if (!user) {
+      throw new CustomError.UnauthenticatedError('Verification Failed 🤦');
+   }
+
+   if (user.verificationToken !== verificationToken) {
+      throw new CustomError.UnauthenticatedError('Verification Failed 🤦');
+   }
+
+   user.isVerified = true;
+   user.verified = Date.now();
+   user.verificationToken = '';
+
+   await user.save();
+
+   res.status(StatusCodes.OK).json({ msg: 'Email and user verified 👍' });
 };
 
 const login = async (req, res) => {
@@ -73,4 +107,5 @@ module.exports = {
    register,
    login,
    logout,
+   verifyEmail,
 };
