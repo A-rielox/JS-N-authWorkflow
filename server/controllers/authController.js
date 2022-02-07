@@ -30,7 +30,26 @@ const register = async (req, res) => {
       verificationToken,
    });
 
+   // 🔥🔥🔥
+   // hay q cambiarlo cuando esté en producción a la dirección donde va a estar el front, como podria ser 'https://react-auth-workflow.netlify.app', o donde sea q se suba el front
    const origin = 'http://localhost:3000';
+
+   //=====//=====//=====//=====//=====//=====//=====//=====
+   //=====//=====//=====//=====//=====//=====//=====//=====
+   // const originnn = req.get('origin');
+   // console.log(`origin: ${originnn}`); //http://localhost:5000 de donde viene el req
+
+   // const protocol = req.protocol;
+   // console.log(`protocol: ${protocol}`); // http
+   // const host = req.get('host');
+   // console.log(`host: ${host}`); // localhost:5000
+
+   // const forwardedHost = req.get('x-forwarded-host');
+   // const forwardedProtocol = req.get('x-forwarded-proto');
+   // console.log(`forwarded Host: ${forwardedHost}`); // localhost:3000 el q necesito
+   // console.log(`forwarded Protocol: ${forwardedProtocol}`); // http
+   //=====//=====//=====//=====//=====//=====//=====//=====
+   //=====//=====//=====//=====//=====//=====//=====//=====
 
    await sendVerificationEmail({
       name: user.name,
