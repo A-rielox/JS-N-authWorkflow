@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { authenticateUser } = require('../middleware/authentication');
 
 const {
    register,
@@ -11,7 +12,7 @@ const {
 // '/api/v1/auth'
 router.post('/register', register);
 router.post('/login', login);
-router.get('/logout', logout);
+router.delete('/logout', logout);
 router.post('/verify-email', verifyEmail);
 
 module.exports = router;
